@@ -12,6 +12,10 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 RATING_MILESTONES = [400, 600, 800, 1000, 1200, 1400, 1500, 1600, 1800, 2000]
+ACCESS_FILE = '' # Input access file name here
+START_ROW = None # Input first row in sheets with player ID/birthdate
+START_COLUMN = None # Input first empty column to start recording the USCF data
+
 
 
 def extract_date(text):
@@ -295,7 +299,7 @@ def rating_progress_by_months_games_and_age(session, uscf_id, dob, total_tournam
 
 def scrape(session, uscf_id_list, dob_list):
 
-    for row_index, (uscf_id, dob) in enumerate(zip(uscf_id_list, dob_list), start=2):
+    for row_index, (uscf_id, dob) in enumerate(zip(uscf_id_list, dob_list), start=START_ROW):
         total_tournaments_played = get_tournaments_played(session, uscf_id)
 
         if total_tournaments_played is None:
@@ -314,8 +318,8 @@ def scrape(session, uscf_id_list, dob_list):
                                )
 
         data_row = [date_of_first_tournament] + [initial_rating] + [age_at_first_tournament] +  rating_milestones_by_month + rating_milestones_by_games + rating_milestones_by_score + rating_milestones_by_age
-        start_column = 5
-        cell_range = f"{chr(64 + start_column)}{row_index}"
+        
+        cell_range = f"{chr(64 + START_COLUMN)}{row_index}"
 
         sheet.update(range_name=cell_range, values=[data_row])
 
